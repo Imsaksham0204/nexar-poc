@@ -1,0 +1,68 @@
+.App {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+.controls {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 6px;
+}
+
+.live-chart-container {
+    position: absolute;
+    margin-top: 0px;
+    margin-left: 20px;
+    padding: 20px;
+    width: 95%;
+    height: 500px;
+}
+
+.App-header {
+    background-color: #282c34;
+    padding: 20px;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+}
+
+.App-link {
+    color: #61dafb;
+}
+
+/* Chart Controls Styles */
+.chart-controls {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.control-btn {
+    background-color: #222222;
+    color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 40px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background-color: #2a2a2a;
+    border-color: #ffffff;
+}
