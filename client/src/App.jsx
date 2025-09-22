@@ -1,19 +1,17 @@
-import { useState } from "react";
-import Sidebar from "./Components/Sidebar.jsx";
 import {
   AppBar,
   Box,
+  createTheme,
   CssBaseline,
+  ThemeProvider,
   Toolbar,
   Typography,
-  Container,
-  Paper,
-  Grid,
-  createTheme,
-  ThemeProvider,
 } from "@mui/material";
-import Signal from "./Components/Signal/Signal.jsx";
-import Controls from "./Components/Controls.jsx";
+import { useEffect, useState } from "react";
+import DashboardLayoutComp from "./Components/DashboardLayoutComp.jsx";
+import Sidebar from "./Components/Sidebar.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSignalDataStart, fetchSignalDataSuccess } from "./Reducers/signal.actions.js";
 
 const drawerWidth = 240;
 
@@ -37,7 +35,24 @@ const darkTheme = createTheme({
 
 function App() {
   const [selected, setSelected] = useState(navItems[0]);
+  const socketConnection = useSelector(
+    (state) => state.connection.socketConnection
+  );
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    if (socketConnection) {
+      // Implement your logic here
+      socketConnection.onmessage = (event) => {
+        dispatch(fetchSignalDataStart());
+        // console.log("Message from server ", event.data);
+        // Handle incoming messages here
+
+        const message = JSON.parse(event.data);
+        dispatch(fetchSignalDataSuccess(message));
+      };
+    }
+  }, [socketConnection]);
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -67,43 +82,7 @@ function App() {
         {/* Offset for AppBar height */}
         <Toolbar />
 
-        {selected.id === "results" ? (
-          <Box maxWidth="lg">
-            <Typography variant="h5" gutterBottom>
-              Results Page
-            </Typography>
-            <Controls />
-            <Signal />
-          </Box>
-        ) : (
-          <Container maxWidth="lg">
-            <Typography variant="h5" gutterBottom>
-              {selected?.label}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              Dummy content for "{selected?.label}". Replace this with your
-              component rendering.
-            </Typography>
-
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid item xs={12} md={8}>
-                <Paper sx={{ p: 2, height: 240 }}>
-                  Main Panel (e.g., charts, table)
-                </Paper>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Paper sx={{ p: 2, height: 240 }}>
-                  Side Panel (e.g., stats, filters)
-                </Paper>
-              </Grid>
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, height: 200 }}>
-                  Full-width panel (e.g., recent activity)
-                </Paper>
-              </Grid>
-            </Grid>
-          </Container>
-        )}
+        <DashboardLayoutComp sidebarId={selected?.id} />
       </Box>
     </Box>
   );

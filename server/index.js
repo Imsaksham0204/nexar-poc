@@ -68,11 +68,14 @@ const server = http.createServer(app);
 // Attach WebSocket server (optional path)
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-wss.on('connection', (ws) => {
-  console.log('WS client connected');
-  ws.send(JSON.stringify({ type: 'welcome', timestamp: Date.now() }));
+// Track subscribers who explicitly requested live streaming
+const subscribers = new Set();
+let streamingInterval = null;
+const INTERVAL_MS = 1000;
+let isPaused = false; // NEW
 
-  // Prime first 50 on first connection (start the global stream from the beginning)
+// Prime the first 50 only once (from the start of the data)
+function ensurePrimed() {
   const isFirstPayload = STREAM_KEYS.every((k) => cumulative[k].length === 0);
   if (isFirstPayload) {
     STREAM_KEYS.forEach((k) => {
@@ -80,36 +83,132 @@ wss.on('connection', (ws) => {
       if (next.length) cumulative[k].push(...next);
     });
   }
+}
 
-  // Send only the initial 50 to this client immediately (not the whole cumulative)
-  const snapshot = JSON.stringify(buildPayload(50));
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(snapshot);
+// NEW: helpers to pause and reset
+function pauseStreaming() {
+  if (streamingInterval) {
+    clearInterval(streamingInterval);
+    streamingInterval = null;
   }
+  isPaused = true;
+}
 
-  ws.on('close', () => console.log('WS client disconnected'));
-});
+function resetStreaming() {
+  // stop interval
+  if (streamingInterval) {
+    clearInterval(streamingInterval);
+    streamingInterval = null;
+  }
+  isPaused = true;
 
-// Broadcast cumulative payload to all connected clients every 3 seconds,
-// appending 50 new points per stream (with wrap-around).
-const INTERVAL_MS = 1000;
-setInterval(() => {
-  try {
-    STREAM_KEYS.forEach((k) => {
-      const next = takeNextChunk(k, 50);
-      if (next.length) cumulative[k].push(...next);
-    });
+  // reset state
+  STREAM_KEYS.forEach((k) => {
+    cursors[k] = 0;
+    cumulative[k] = [];
+  });
 
-    const json = JSON.stringify(buildPayload());
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(json);
+  // send empty payload (metadata preserved, displayDataChunk empty)
+  const emptyJson = JSON.stringify(buildPayload(0));
+  subscribers.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(emptyJson);
+    } else {
+      subscribers.delete(client);
+    }
+  });
+}
+
+// Start the streaming loop (append next 50 and send to subscribers)
+function startStreamingLoop() {
+  if (streamingInterval || isPaused) return; // UPDATED: respect pause
+  streamingInterval = setInterval(() => {
+    try {
+      STREAM_KEYS.forEach((k) => {
+        const next = takeNextChunk(k, 50);
+        if (next.length) cumulative[k].push(...next);
+      });
+
+      const json = JSON.stringify(buildPayload());
+      // Send only to clients that requested live streaming
+      subscribers.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(json);
+        } else {
+          subscribers.delete(client);
+        }
+      });
+    } catch (err) {
+      console.error('Error building/sending payload:', err);
+    }
+  }, INTERVAL_MS);
+}
+
+wss.on('connection', (ws) => {
+  console.log('WS client connected');
+
+  // Do nothing on connect. Wait for the client message to start streaming.
+  ws.on('message', (raw) => {
+    let msg;
+    try {
+      msg = JSON.parse(raw.toString());
+    } catch {
+      return; // ignore non-JSON messages
+    }
+    console.log(msg);
+
+    if (!msg || typeof msg.action !== 'string') return;
+
+    switch (msg.action) {
+      case 'startLiveStream': {
+        const firstTime = !subscribers.has(ws);
+        if (firstTime) {
+          subscribers.add(ws);
+
+          // Ensure the stream is primed from the beginning once someone requests it
+          ensurePrimed();
+
+          // Send only the initial 50 to this client immediately
+          const snapshot = JSON.stringify(buildPayload(50));
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(snapshot);
+          }
+        }
+
+        // Resume/start the periodic streaming loop
+        isPaused = false; // allow loop to run
+        startStreamingLoop();
+        break;
       }
-    });
-  } catch (err) {
-    console.error('Error building/sending payload:', err);
-  }
-}, INTERVAL_MS);
+
+      case 'pauseLiveStream': {
+        // Pause global streaming, retain current cumulative data and cursors
+        pauseStreaming();
+        break;
+      }
+
+      case 'resetLiveStream': {
+        // Stop, clear all state, and broadcast empty payload
+        resetStreaming();
+        break;
+      }
+
+      default:
+        // ignore unknown actions
+        break;
+    }
+  });
+
+  ws.on('close', () => {
+    subscribers.delete(ws);
+    // Stop the loop if nobody is listening
+    if (subscribers.size === 0 && streamingInterval) {
+      clearInterval(streamingInterval);
+      streamingInterval = null;
+    }
+    console.log('WS client disconnected');
+  });
+});
 
 server.listen(3003, () => {
   console.log('HTTP server listening on http://localhost:3003');
