@@ -1,15 +1,29 @@
 const express = require('express');
 const http = require('http');
 const { WebSocketServer, WebSocket } = require('ws');
+const cors = require('cors');
 
-// Load seed data (supports different export styles)
-const seedModule = require('./seedData');
-const seedData = (seedModule && (seedModule.seedData || seedModule.default || seedModule)) || null;
+// Load seed data per-connection (supports different export styles)
+let seedData = null;
 
-// Resolve keys and helpers
-const STREAM_KEYS = ['2', '3'].filter((k) => seedData && (seedData[k] ?? seedData[Number(k)]));
-const cursors = Object.fromEntries(STREAM_KEYS.map((k) => [k, 0]));
-const cumulative = Object.fromEntries(STREAM_KEYS.map((k) => [k, []]));
+// Resolve keys and helpers (mutable to re-init per connection)
+let STREAM_KEYS = [];
+let cursors = {};
+let cumulative = {};
+
+function chooseRandomSeedAndInit() {
+  const MAX_FILES = 7;
+  const choice = 1 + Math.floor(Math.random() * MAX_FILES);
+  const modulePath = `./seed/seedData-${choice}`;
+  const seedModule = require(modulePath);
+  seedData = (seedModule && (seedModule.seedData || seedModule.default || seedModule)) || null;
+
+  STREAM_KEYS = ['2', '3'].filter((k) => seedData && (seedData[k] ?? seedData[Number(k)]));
+  cursors = Object.fromEntries(STREAM_KEYS.map((k) => [k, 0]));
+  cumulative = Object.fromEntries(STREAM_KEYS.map((k) => [k, []]));
+
+  console.log(`WS connection: using ${modulePath} with keys [${STREAM_KEYS.join(', ')}]`);
+}
 
 function getSourceForKey(key) {
   return seedData ? (seedData[key] ?? seedData[Number(key)]) : null;
@@ -57,9 +71,20 @@ function buildPayload(limit) {
 }
 
 const app = express();
+app.use(cors({ origin: 'http://localhost:5173' })); // allow Vite dev origin
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
+});
+
+app.get('/api/v1/getDummyData/:id', (req, res) => {
+  const reqId = req.params.id;
+  const modulePath = `./seed/seedData-${reqId}`;
+  const seedModule = require(modulePath);
+  const seedData = (seedModule && (seedModule.seedData || seedModule.default || seedModule)) || null;
+
+  console.log(`Received request for dummy data id=${reqId}`);
+  res.json({ status: 'ok', seedId: reqId, seedData });
 });
 
 // Create a single HTTP server for both Express and WS
@@ -146,6 +171,9 @@ function startStreamingLoop() {
 
 wss.on('connection', (ws) => {
   console.log('WS client connected');
+
+  // Pick a random seed and initialize state for this connection
+  chooseRandomSeedAndInit();
 
   // Do nothing on connect. Wait for the client message to start streaming.
   ws.on('message', (raw) => {

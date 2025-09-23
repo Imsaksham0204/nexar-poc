@@ -3,14 +3,14 @@ import "./Controls.css";
 import {
   fetchSignalDataStart,
   fetchSignalDataSuccess,
-} from "../Reducers/signal.actions";
+} from "../../Reducers/signal.actions";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchConnectionDataStart,
   fetchConnectionDataFailure,
   onSocketConnect,
   onSocketDisconnect,
-} from "../Reducers/Connection/connection.reducer";
+} from "../../Reducers/Connection/connection.reducer";
 import { Button, TextField, Stack, ButtonGroup, Chip } from "@mui/material";
 
 const Controls = () => {

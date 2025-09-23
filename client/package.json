@@ -14,6 +14,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
+    "@mui/x-tree-view": "^8.11.3",
     "@reduxjs/toolkit": "^2.9.0",
     "grl-react-assets": "github:Imsaksham0204/SW-React-Assets#user-interactions",
     "react": "^18.2.0",

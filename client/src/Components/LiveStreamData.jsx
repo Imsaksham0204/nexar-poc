@@ -1,10 +1,12 @@
 import { Box, Stack, Button, ButtonGroup, Chip } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchSignalDataStart, fetchSignalDataSuccess } from "../Reducers/signal.actions";
 
 const START_ACTION = "startLiveStream"; // change to "startLiveMode" if server expects that
 const PAUSE_ACTION = "pauseLiveStream";
 const RESET_ACTION = "resetLiveStream";
+export const API_URL = "/api/v1/getDummyData/";
 
 const LiveStreamData = () => {
   const socketConnection = useSelector((state) => state.connection.socketConnection);
@@ -12,6 +14,7 @@ const LiveStreamData = () => {
   const [mode, setMode] = useState("idle"); // 'idle' | 'streaming' | 'paused'
   const [isConnected, setIsConnected] = useState(false);
 
+  const dispatch = useDispatch();
   // Track WebSocket connection state
   useEffect(() => {
     if (!socketConnection) {
@@ -69,6 +72,18 @@ const LiveStreamData = () => {
     [isConnected, mode]
   );
 
+  const onLoadOfflineData = () => {
+    dispatch(fetchSignalDataStart());
+    fetch(`${API_URL}${1}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        dispatch(fetchSignalDataSuccess(data.seedData));
+      })
+      .catch((error) => {
+        console.error("Error loading offline data:", error);
+      });
+  };
   return (
     <Box sx={{ p: 1, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
@@ -81,6 +96,9 @@ const LiveStreamData = () => {
           </Button>
           <Button color="error" onClick={onLiveModeReset} disabled={!canReset}>
             Reset
+          </Button>
+          <Button color="error" onClick={onLoadOfflineData} disabled={mode === "streaming"}>
+            Load Offline Data
           </Button>
         </ButtonGroup>
         <Chip size="small" label={statusLabel} color={statusColor} />

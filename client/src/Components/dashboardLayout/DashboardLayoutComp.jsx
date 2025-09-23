@@ -1,20 +1,15 @@
 import {
-  AppBar,
-  Box,
-  CssBaseline,
-  Toolbar,
-  Typography,
   Container,
-  Paper,
   Grid,
-  createTheme,
-  ThemeProvider,
-  Button,
+  Paper,
+  Typography
 } from "@mui/material";
-import Signal from "./Signal/Signal";
-import Controls from "./Controls";
-import { useSelector } from "react-redux";
-import LiveStreamData from "./LiveStreamData";
+import Controls from "../connectionControls/Controls";
+import Layout from "../Layout.results.component";
+import LiveStreamData from "../LiveStreamData";
+import Packets from "../Packet";
+import Signal from "../Signal/Signal";
+import ControlledExpansion from "../TreeView";
 
 const DashboardLayoutComp = ({ sidebarId }) => {
   
@@ -25,13 +20,10 @@ const DashboardLayoutComp = ({ sidebarId }) => {
 
     case "results":
       return (
-        <Box maxWidth="lg">
-          <Typography variant="h5" gutterBottom>
-            Results Page
-          </Typography>
+        <>
           <LiveStreamData />
-          <Signal />
-        </Box>
+          <Layout View1={<ControlledExpansion />} View2={<Packets />} View3={<Signal />} />
+        </>
       );
     default:
       return (
@@ -66,10 +58,3 @@ const DashboardLayoutComp = ({ sidebarId }) => {
   }
 };
 export default DashboardLayoutComp;
-
-//  <Box maxWidth="lg">
-//       <Typography variant="h5" gutterBottom>
-//         Results Page
-//       </Typography>
-//       <Signal />
-//     </Box>

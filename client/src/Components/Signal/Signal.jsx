@@ -1,10 +1,9 @@
-import { SignalChart } from "grl-react-assets";
 import { useState, useEffect, useRef } from "react";
-import { seedData } from "./seedData.js";
+// import { seedData } from "./seedData.js";
 import "./style.css";
 import { useSelector } from "react-redux";
+import { SignalChart } from "grl-react-assets/dist/index.cjs";
 
-console.log(seedData);
 
 function Signal() {
   const [chartData, setChartData] = useState(null);
@@ -20,90 +19,90 @@ function Signal() {
   const { loading, signalData } = useSelector((state) => state.signal);
 
   // Generate random data for live mode with specific ranges
-  const generateRandomData = (yAxisKey) => {
-    let randomValue;
+  // const generateRandomData = (yAxisKey) => {
+  //   let randomValue;
 
-    if (yAxisKey === "2") {
-      // First dataset: range between 11.50 and 12.50
-      randomValue = 11.5 + Math.random() * (12.5 - 11.5);
-    } else if (yAxisKey === "3") {
-      // Second dataset: range between -0.67 and 0.00
-      randomValue = -0.67 + Math.random() * (0.0 - -0.67);
-    } else {
-      // Fallback for any other axis
-      const originalData = seedData[yAxisKey];
-      const { yaxisMin, yaxisMax } = originalData;
-      randomValue = Math.random() * (yaxisMax - yaxisMin) + yaxisMin;
-    }
+  //   if (yAxisKey === "2") {
+  //     // First dataset: range between 11.50 and 12.50
+  //     randomValue = 11.5 + Math.random() * (12.5 - 11.5);
+  //   } else if (yAxisKey === "3") {
+  //     // Second dataset: range between -0.67 and 0.00
+  //     randomValue = -0.67 + Math.random() * (0.0 - -0.67);
+  //   } else {
+  //     // Fallback for any other axis
+  //     const originalData = seedData[yAxisKey];
+  //     const { yaxisMin, yaxisMax } = originalData;
+  //     randomValue = Math.random() * (yaxisMax - yaxisMin) + yaxisMin;
+  //   }
 
-    return randomValue;
-  };
+  //   return randomValue;
+  // };
 
-  // Initialize empty live data structure
-  const initializeLiveData = () => {
-    const liveData = {};
-    Object.keys(seedData).forEach((yAxisKey) => {
-      const originalAxisData = seedData[yAxisKey];
-      liveData[yAxisKey] = {
-        ...originalAxisData,
-        displayDataChunk: [],
-        startDataLongTime: 0,
-        endDataLongTime: 5 * Math.pow(10, 9), // 5 seconds in nanoseconds
-        absoluteStartTime: 0,
-        absoluteEndTime: 5 * Math.pow(10, 9),
-      };
-    });
-    return liveData;
-  };
+  // // Initialize empty live data structure
+  // const initializeLiveData = () => {
+  //   const liveData = {};
+  //   Object.keys(seedData).forEach((yAxisKey) => {
+  //     const originalAxisData = seedData[yAxisKey];
+  //     liveData[yAxisKey] = {
+  //       ...originalAxisData,
+  //       displayDataChunk: [],
+  //       startDataLongTime: 0,
+  //       endDataLongTime: 5 * Math.pow(10, 9), // 5 seconds in nanoseconds
+  //       absoluteStartTime: 0,
+  //       absoluteEndTime: 5 * Math.pow(10, 9),
+  //     };
+  //   });
+  //   return liveData;
+  // };
 
-  // Update chart data with new random values
-  const updateLiveData = () => {
-    setChartData((prevData) => {
-      const newData = { ...prevData };
+  // // Update chart data with new random values
+  // const updateLiveData = () => {
+  //   setChartData((prevData) => {
+  //     const newData = { ...prevData };
 
-      // Update each y-axis data
-      Object.keys(newData).forEach((yAxisKey) => {
-        const currentAxisData = newData[yAxisKey];
-        let updatedDisplayDataChunk = [...currentAxisData.displayDataChunk];
-        let currentEndTime = currentAxisData.endDataLongTime;
+  //     // Update each y-axis data
+  //     Object.keys(newData).forEach((yAxisKey) => {
+  //       const currentAxisData = newData[yAxisKey];
+  //       let updatedDisplayDataChunk = [...currentAxisData.displayDataChunk];
+  //       let currentEndTime = currentAxisData.endDataLongTime;
 
-        // Generate 100 new data points per interval
-        for (let i = 0; i < 100; i++) {
-          const newDataPoint = generateRandomData(yAxisKey);
-          updatedDisplayDataChunk.push(newDataPoint);
-        }
+  //       // Generate 100 new data points per interval
+  //       for (let i = 0; i < 100; i++) {
+  //         const newDataPoint = generateRandomData(yAxisKey);
+  //         updatedDisplayDataChunk.push(newDataPoint);
+  //       }
 
-        // Check if array has reached 1000 points
-        if (updatedDisplayDataChunk.length >= 1000) {
-          // Remove data from even indices (0, 2, 4, 6, ...)
-          updatedDisplayDataChunk = updatedDisplayDataChunk.filter(
-            (_, index) => index % 2 !== 0
-          );
+  //       // Check if array has reached 1000 points
+  //       if (updatedDisplayDataChunk.length >= 1000) {
+  //         // Remove data from even indices (0, 2, 4, 6, ...)
+  //         updatedDisplayDataChunk = updatedDisplayDataChunk.filter(
+  //           (_, index) => index % 2 !== 0
+  //         );
 
-          // Increase end time by 5 seconds (keep start time at 0)
-          currentEndTime += 5 * Math.pow(10, 9);
-        }
+  //         // Increase end time by 5 seconds (keep start time at 0)
+  //         currentEndTime += 5 * Math.pow(10, 9);
+  //       }
 
-        // Update the axis data
-        newData[yAxisKey] = {
-          ...currentAxisData,
-          displayDataChunk: updatedDisplayDataChunk,
-          startDataLongTime: 0, // Always keep start time at 0
-          endDataLongTime: currentEndTime,
-          absoluteStartTime: 0,
-          absoluteEndTime: currentEndTime,
-        };
-      });
+  //       // Update the axis data
+  //       newData[yAxisKey] = {
+  //         ...currentAxisData,
+  //         displayDataChunk: updatedDisplayDataChunk,
+  //         startDataLongTime: 0, // Always keep start time at 0
+  //         endDataLongTime: currentEndTime,
+  //         absoluteStartTime: 0,
+  //         absoluteEndTime: currentEndTime,
+  //       };
+  //     });
 
-      return newData;
-    });
+  //     return newData;
+  //   });
 
-    // Update live data state
-    setLiveDataState((prev) => ({
-      currentTimeSeconds: prev.currentTimeSeconds + 1,
-      intervalCount: prev.intervalCount + 1,
-    }));
-  };
+  //   // Update live data state
+  //   setLiveDataState((prev) => ({
+  //     currentTimeSeconds: prev.currentTimeSeconds + 1,
+  //     intervalCount: prev.intervalCount + 1,
+  //   }));
+  // };
 
   // Generate one-time random data
   const generateOneTimeData = () => {
@@ -265,7 +264,7 @@ function Signal() {
                 </span>
             </div>
         </div> */}
-      <div className="chart-controls">
+      {/* <div className="chart-controls">
         <button
           className="control-btn"
           onClick={() => chartControlsRef.current?.toggleHorizontalZoom()}
@@ -308,7 +307,7 @@ function Signal() {
         >
           →
         </button>
-      </div>
+      </div> */}
 
       <SignalChart
         ref={chartControlsRef}
