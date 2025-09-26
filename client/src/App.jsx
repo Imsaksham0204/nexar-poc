@@ -1,4 +1,8 @@
-import { styled, ThemeProvider, createTheme } from "@mui/material/styles";
+import AnalyticsTwoToneIcon from "@mui/icons-material/AnalyticsTwoTone";
+import CastConnectedTwoToneIcon from "@mui/icons-material/CastConnectedTwoTone";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import MenuIcon from "@mui/icons-material/Menu";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
 import {
   Box,
   CssBaseline,
@@ -14,19 +18,15 @@ import {
 } from "@mui/material";
 import MuiAppBar from "@mui/material/AppBar";
 import MuiDrawer from "@mui/material/Drawer";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
-import CastConnectedTwoToneIcon from "@mui/icons-material/CastConnectedTwoTone";
-import AnalyticsTwoToneIcon from "@mui/icons-material/AnalyticsTwoTone";
+import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
 import { useEffect, useState } from "react";
-import DashboardLayoutComp from "./Components/dashboardLayout/DashboardLayoutComp.jsx";
 import { useDispatch, useSelector } from "react-redux";
+import DashboardLayoutComp from "./Components/dashboardLayout/DashboardLayoutComp.jsx";
 import {
   fetchSignalDataStart,
   fetchSignalDataSuccess,
 } from "./Reducers/signal.actions.js";
+import { navItems } from "./utils/dashboard.json";
 
 const drawerWidth = 240;
 
@@ -94,15 +94,15 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-const navItems = [
-  { id: "connection", label: "Connection", secondary: "Connection Details" },
-  { id: "results", label: "Results Page", secondary: "Results Overview" },
-  {
-    id: "json analytics",
-    label: "JSON Analytics",
-    secondary: "Analyze your JSON data",
-  },
-];
+// const navItems = [
+//   { id: "connection", label: "Connection", secondary: "Connection Details" },
+//   { id: "results", label: "Results Page", secondary: "Results Overview" },
+//   {
+//     id: "json analytics",
+//     label: "JSON Analytics",
+//     secondary: "Analyze your JSON data",
+//   },
+// ];
 
 const darkTheme = createTheme({
   palette: {
@@ -140,7 +140,6 @@ function App() {
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
 
-      {/* Dark theme only for AppBar + Drawer */}
       <ThemeProvider theme={darkTheme}>
         <AppBar position="fixed" open={open} color="primary">
           <Toolbar>

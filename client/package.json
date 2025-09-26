@@ -10,15 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blueprintjs/core": "^6.3.1",
+    "@blueprintjs/icons": "^6.1.0",
+    "@blueprintjs/popover2": "^2.1.32",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "@mui/x-tree-view": "^8.11.3",
     "@reduxjs/toolkit": "^2.9.0",
+    "classnames": "^2.5.1",
     "grl-react-assets": "github:Imsaksham0204/SW-React-Assets#user-interactions",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-mosaic-component": "^6.1.1",
     "react-redux": "^9.2.0",
     "split-pane-react": "^0.1.3"
   },

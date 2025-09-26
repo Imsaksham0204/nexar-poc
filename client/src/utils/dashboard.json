@@ -1,0 +1,24 @@
+{
+    "navItems": [
+        {
+            "id": "connection",
+            "label": "Connection",
+            "secondary": "Connection Details"
+        },
+        {
+            "id": "results",
+            "label": "Results Page",
+            "secondary": "Results Overview"
+        },
+        {
+            "id": "json analytics",
+            "label": "JSON Analytics",
+            "secondary": "Analyze your JSON data"
+        },
+        {
+            "id": "json",
+            "label": "JSON",
+            "secondary": "Analyze your JSON data"
+        }
+    ]
+}

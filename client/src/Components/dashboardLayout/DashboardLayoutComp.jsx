@@ -5,15 +5,10 @@ import {
   Typography
 } from "@mui/material";
 import Controls from "../connectionControls/Controls";
-import Layout from "../Layout.results.component";
+import LayoutResults from "../Layout/Results";
 import LiveStreamData from "../LiveStreamData";
-import Packets from "../Packet";
-import Signal from "../Signal/Signal";
-import ControlledExpansion from "../TreeView";
 
 const DashboardLayoutComp = ({ sidebarId }) => {
-  
-
   switch (sidebarId) {
     case "connection":
       return <Controls />;
@@ -22,7 +17,8 @@ const DashboardLayoutComp = ({ sidebarId }) => {
       return (
         <>
           <LiveStreamData />
-          <Layout View1={<ControlledExpansion />} View2={<Packets />} View3={<Signal />} />
+          {/* <Layout View1={<ControlledExpansion />} View2={<Packets />} View3={<Signal />} /> */}
+          <LayoutResults />
         </>
       );
     default:

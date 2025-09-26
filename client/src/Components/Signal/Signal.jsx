@@ -312,7 +312,7 @@ function Signal() {
       <SignalChart
         ref={chartControlsRef}
         width={"100%"}
-        height={400}
+        height={"100%"}
         yAxisRef={["2", "3"]}
         yAxisColors={["violet", "red"]}
         yAxisNames={["Current", "Voltage"]}
